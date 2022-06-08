@@ -1,1 +1,48 @@
 
+"use strict";
+let prompt = require("prompt-sync")()
+//let fs = require("fs"); // permite a criação de arquivo
+const { encode } = require("punycode");
+
+async function connect() {
+  console.log("Linha 4 - Estou no connect")
+  const { Client } = require('pg')
+  const client = new Client({ connectionString: "postgres://gdkjvapq:sIXZVWNgJ-bTdLbLI1rEFNbpsmtCd8_e@heffalump.db.elephantsql.com/gdkjvapq" })
+  await client.connect();
+  const result = await client.query('SELECT t.pct_tempo, avg(f.salario)from trabalha t, funcionario f WHERE t.id_funcionario = f.id GROUP by t.pct_tempo')
+  
+  let fieldsLength = new Array();
+  for(let i = 0; i < result.fields.length; i++){
+    if(i>0)process.stdout.write(" |"); 
+    process.stdout.write(" "); 
+    process.stdout.write(result.fields[i].name); 
+    fieldsLength[i] = result.fields[i].name.length;
+  }
+  console.log("");
+
+  for(let i = 0; i < fieldsLength.length; i++){
+    if(i > 0 )process.stdout.write("-+"); 
+    process.stdout.write("-"); 
+    for(let j = 0; j < fieldsLength[i]; j++)
+      process.stdout.write('-'); 
+  }
+  console.log("");
+
+  for(let i = 0; i < result.rowCount; i++){
+    // for(j = 0; j < fieldsLength; j++){
+    //   if(j>0)process.stdout.write(" |"); 
+    //   process.stdout.write(" "); 
+    //   process.stdout.write(result.rows[i][j]); 
+    // }
+    console.log(result.rows[i]);
+  }
+
+  console.log("");
+
+  console.log("(" + result.rowCount + " row" + (result.rowCount>1?"s":"") + ")" );
+  // console.log(result);
+  await client.end();
+}
+
+connect()
+
